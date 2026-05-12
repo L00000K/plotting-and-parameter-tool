@@ -30,23 +30,19 @@ export function FactualDataTable() {
 
   const page_rows = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-
   const holeIds = useMemo(() => [...new Set(allRows.map((r) => r.hole_id))].sort(), [allRows]);
 
   if (allRows.length === 0) {
-    return <p className="text-slate-500 text-sm p-4">No factual data loaded. Use the Import tab to load data.</p>;
+    return <p className="text-gray-400 text-sm p-4">No factual data loaded. Use the Import tab to load data.</p>;
   }
 
   return (
     <div className="flex flex-col h-full gap-2">
       <div className="flex gap-3 items-center px-1">
-        <label className="text-xs text-slate-400">
+        <label className="text-xs text-gray-600">
           Type:{' '}
-          <select
-            value={filterType}
-            onChange={(e) => { setFilterType(e.target.value as FilterType); setPage(0); }}
-            className="ml-1 bg-slate-800 border border-slate-600 rounded px-2 py-0.5 text-slate-200"
-          >
+          <select value={filterType} onChange={(e) => { setFilterType(e.target.value as FilterType); setPage(0); }}
+            className="ml-1 bg-white border border-gray-300 rounded px-2 py-0.5 text-gray-800">
             <option value="All">All ({allRows.length})</option>
             {(['CPT', 'SPT', 'ShearBox', 'Triaxial'] as SourceType[]).map((t) => {
               const count = allRows.filter((r) => r.type === t).length;
@@ -54,32 +50,27 @@ export function FactualDataTable() {
             })}
           </select>
         </label>
-        <label className="text-xs text-slate-400">
+        <label className="text-xs text-gray-600">
           Hole:{' '}
-          <select
-            value={filterHole}
-            onChange={(e) => { setFilterHole(e.target.value); setPage(0); }}
-            className="ml-1 bg-slate-800 border border-slate-600 rounded px-2 py-0.5 text-slate-200"
-          >
+          <select value={filterHole} onChange={(e) => { setFilterHole(e.target.value); setPage(0); }}
+            className="ml-1 bg-white border border-gray-300 rounded px-2 py-0.5 text-gray-800">
             <option value="">All holes</option>
             {holeIds.map((h) => <option key={h} value={h}>{h}</option>)}
           </select>
         </label>
-        <span className="text-xs text-slate-500 ml-auto">
-          {filtered.length.toLocaleString()} rows
-        </span>
+        <span className="text-xs text-gray-400 ml-auto">{filtered.length.toLocaleString()} rows</span>
       </div>
 
-      <div className="overflow-auto flex-1 border border-slate-700 rounded">
+      <div className="overflow-auto flex-1 border border-gray-200 rounded bg-white">
         <table className="w-full text-xs">
-          <thead className="bg-slate-800 sticky top-0">
+          <thead className="bg-gray-50 sticky top-0 border-b border-gray-200">
             <tr>
-              <th className="px-2 py-1.5 text-left text-slate-400 font-medium">Type</th>
-              <th className="px-2 py-1.5 text-left text-slate-400 font-medium">Hole ID</th>
-              <th className="px-2 py-1.5 text-right text-slate-400 font-medium">Elev (m AOD)</th>
-              <th className="px-2 py-1.5 text-right text-slate-400 font-medium">Value 1</th>
-              <th className="px-2 py-1.5 text-right text-slate-400 font-medium">Value 2</th>
-              <th className="px-2 py-1.5 text-right text-slate-400 font-medium">Value 3</th>
+              <th className="px-2 py-1.5 text-left text-gray-500 font-medium">Type</th>
+              <th className="px-2 py-1.5 text-left text-gray-500 font-medium">Hole ID</th>
+              <th className="px-2 py-1.5 text-right text-gray-500 font-medium">Elev (m AOD)</th>
+              <th className="px-2 py-1.5 text-right text-gray-500 font-medium">Value 1</th>
+              <th className="px-2 py-1.5 text-right text-gray-500 font-medium">Value 2</th>
+              <th className="px-2 py-1.5 text-right text-gray-500 font-medium">Value 3</th>
             </tr>
           </thead>
           <tbody>
@@ -100,16 +91,16 @@ export function FactualDataTable() {
               } else if (row.type === 'Triaxial') {
                 v1 = `σ3: ${row.cell_pressure} kPa`;
                 v2 = `Δσ: ${row.deviator_stress_at_failure} kPa`;
-                v3 = `${row.test_type} | Unit: ${row.geo_unit}`;
+                v3 = `${row.test_type} | ${row.geo_unit}`;
               }
               return (
-                <tr key={i} className={i % 2 === 0 ? 'bg-slate-900' : 'bg-slate-800/50'}>
-                  <td className="px-2 py-1 text-slate-300">{row.type as string}</td>
-                  <td className="px-2 py-1 text-slate-300">{row.hole_id}</td>
-                  <td className="px-2 py-1 text-right text-slate-300">{(row.elevation as number).toFixed(2)}</td>
-                  <td className="px-2 py-1 text-right text-slate-400">{v1}</td>
-                  <td className="px-2 py-1 text-right text-slate-400">{v2}</td>
-                  <td className="px-2 py-1 text-right text-slate-400">{v3}</td>
+                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-2 py-1 text-gray-700">{row.type as string}</td>
+                  <td className="px-2 py-1 text-gray-700">{row.hole_id}</td>
+                  <td className="px-2 py-1 text-right text-gray-700">{(row.elevation as number).toFixed(2)}</td>
+                  <td className="px-2 py-1 text-right text-gray-500">{v1}</td>
+                  <td className="px-2 py-1 text-right text-gray-500">{v2}</td>
+                  <td className="px-2 py-1 text-right text-gray-500">{v3}</td>
                 </tr>
               );
             })}
@@ -118,18 +109,12 @@ export function FactualDataTable() {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex gap-2 items-center justify-end text-xs text-slate-400">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="px-2 py-0.5 bg-slate-700 rounded disabled:opacity-40 cursor-pointer"
-          >←</button>
+        <div className="flex gap-2 items-center justify-end text-xs text-gray-500">
+          <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
+            className="px-2 py-0.5 bg-white border border-gray-300 rounded disabled:opacity-40 cursor-pointer">←</button>
           <span>Page {page + 1} / {totalPages}</span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="px-2 py-0.5 bg-slate-700 rounded disabled:opacity-40 cursor-pointer"
-          >→</button>
+          <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
+            className="px-2 py-0.5 bg-white border border-gray-300 rounded disabled:opacity-40 cursor-pointer">→</button>
         </div>
       )}
     </div>

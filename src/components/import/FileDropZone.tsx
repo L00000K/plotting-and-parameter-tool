@@ -18,7 +18,7 @@ export function FileDropZone({ onFile, accept = '.csv,.ags,.txt' }: Props) {
   return (
     <div
       className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-        ${dragging ? 'border-blue-400 bg-blue-950/30' : 'border-slate-600 hover:border-slate-400'}`}
+        ${dragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'}`}
       onClick={() => inputRef.current?.click()}
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
@@ -29,10 +29,10 @@ export function FileDropZone({ onFile, accept = '.csv,.ags,.txt' }: Props) {
         if (file) readFile(file);
       }}
     >
-      <p className="text-slate-400 text-sm">
-        Drop file here or <span className="text-blue-400 underline">browse</span>
+      <p className="text-gray-500 text-sm">
+        Drop file here or <span className="text-blue-600 underline">browse</span>
       </p>
-      <p className="text-slate-500 text-xs mt-1">{accept}</p>
+      <p className="text-gray-400 text-xs mt-1">{accept}</p>
       <input
         ref={inputRef}
         type="file"

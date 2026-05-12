@@ -13,27 +13,27 @@ export function StatusBar() {
   }[status.phase];
 
   return (
-    <div className="flex items-center gap-4 px-4 py-1.5 bg-slate-900 border-t border-slate-700 text-xs text-slate-400">
+    <div className="flex items-center gap-4 px-4 py-1.5 bg-white border-t border-gray-200 text-xs text-gray-500">
       <span>
         <span className="mr-1">{phaseIcon}</span>
         {status.phase === 'idle' && (
           <button
             onClick={initPyodide}
-            className="underline hover:text-blue-400 cursor-pointer"
+            className="underline hover:text-blue-600 cursor-pointer"
           >
             Load Python runtime
           </button>
         )}
-        {status.phase === 'loading' && status.progress_message}
-        {status.phase === 'ready' && 'Python ready'}
+        {status.phase === 'loading' && <span className="text-amber-600">{status.progress_message}</span>}
+        {status.phase === 'ready' && <span className="text-green-700">Python ready</span>}
         {status.phase === 'error' && (
-          <span className="text-red-400">
+          <span className="text-red-600">
             Python error: {status.error_message}{' '}
-            <button onClick={initPyodide} className="underline hover:text-red-300 cursor-pointer">Retry</button>
+            <button onClick={initPyodide} className="underline hover:text-red-500 cursor-pointer">Retry</button>
           </span>
         )}
       </span>
-      <span className="text-slate-500">|</span>
+      <span className="text-gray-300">|</span>
       <span>{interpretedCount.toLocaleString()} interpreted values</span>
     </div>
   );

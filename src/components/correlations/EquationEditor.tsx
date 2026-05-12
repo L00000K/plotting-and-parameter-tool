@@ -1,7 +1,6 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
 import { python } from '@codemirror/lang-python';
-import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState } from '@codemirror/state';
 
 interface Props {
@@ -11,6 +10,17 @@ interface Props {
   height?: string;
 }
 
+// Light theme for CodeMirror
+const lightTheme = EditorView.theme({
+  '&': { backgroundColor: '#ffffff', color: '#1e293b' },
+  '.cm-content': { caretColor: '#3b82f6' },
+  '.cm-gutters': { backgroundColor: '#f8fafc', color: '#94a3b8', border: 'none', borderRight: '1px solid #e2e8f0' },
+  '.cm-activeLineGutter': { backgroundColor: '#eff6ff' },
+  '.cm-activeLine': { backgroundColor: '#eff6ff' },
+  '.cm-selectionBackground': { backgroundColor: '#bfdbfe !important' },
+  '.cm-cursor': { borderLeftColor: '#3b82f6' },
+}, { dark: false });
+
 export function EquationEditor({ value, onChange, readOnly = false, height = '200px' }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -18,11 +28,9 @@ export function EquationEditor({ value, onChange, readOnly = false, height = '20
   const extensions = useMemo(() => [
     basicSetup,
     python(),
-    oneDark,
+    lightTheme,
     EditorView.updateListener.of((update) => {
-      if (update.docChanged && !readOnly) {
-        onChange(update.state.doc.toString());
-      }
+      if (update.docChanged && !readOnly) onChange(update.state.doc.toString());
     }),
     ...(readOnly ? [EditorState.readOnly.of(true)] : []),
   ], [onChange, readOnly]);
@@ -38,7 +46,6 @@ export function EquationEditor({ value, onChange, readOnly = false, height = '20
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync external value changes (e.g. reset)
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
@@ -48,7 +55,5 @@ export function EquationEditor({ value, onChange, readOnly = false, height = '20
     }
   }, [value]);
 
-  return (
-    <div ref={containerRef} style={{ height, overflow: 'auto' }} />
-  );
+  return <div ref={containerRef} style={{ height, overflow: 'auto' }} />;
 }

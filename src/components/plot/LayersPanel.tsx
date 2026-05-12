@@ -3,9 +3,10 @@ import { useProjectStore } from '@/store/useProjectStore';
 interface Props {
   hiddenLayers: Set<string>;
   onToggle: (key: string) => void;
+  onNavigate?: (tab: string) => void;
 }
 
-export function LayersPanel({ hiddenLayers, onToggle }: Props) {
+export function LayersPanel({ hiddenLayers, onToggle, onNavigate }: Props) {
   const correlations = useProjectStore((s) => s.correlations);
   const design_lines = useProjectStore((s) => s.design_lines);
   const units = useProjectStore((s) => s.ground_model.units);
@@ -79,6 +80,15 @@ export function LayersPanel({ hiddenLayers, onToggle }: Props) {
 
         {activeCorrLayers.length === 0 && designLayers.length === 0 && (
           <p className="text-xs text-gray-400">No layers yet. Load data or add a design line.</p>
+        )}
+
+        {onNavigate && (
+          <button
+            onClick={() => onNavigate('design-lines')}
+            className="w-full text-xs px-2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded cursor-pointer font-medium mt-1"
+          >
+            + Add Design Line
+          </button>
         )}
       </div>
     </div>

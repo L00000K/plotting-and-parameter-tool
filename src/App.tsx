@@ -107,7 +107,7 @@ export default function App() {
               <MainPlot hiddenLayers={hiddenLayers} />
             </div>
             <div className="w-48 flex-shrink-0">
-              <LayersPanel hiddenLayers={hiddenLayers} onToggle={toggleLayer} />
+              <LayersPanel hiddenLayers={hiddenLayers} onToggle={toggleLayer} onNavigate={navigate} />
             </div>
           </div>
         ) : (

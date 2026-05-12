@@ -6,12 +6,10 @@ import { correctSPT } from '@/services/geotechnical/sptCorrections';
 import { shearBoxPhi, triaxialPhi } from '@/services/geotechnical/regressionUtils';
 import { getUnitAtElevation, elevationToDepth } from '@/utils/depthUtils';
 import type { InterpretedRow } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
 
-const DEBOUNCE_MS = 800;
+const DEBOUNCE_MS = 400;
 
 export function useEquationRecalculation() {
-  const store = useProjectStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const runningRef = useRef(false);
 
@@ -29,9 +27,9 @@ export function useEquationRecalculation() {
 
     for (const corr of cptCorrelations) {
       if (pyodideService.getPhase() !== 'ready') continue;
-      const batchVars: Record<string, number>[] = allCPTRows.map((row) => {
+      const batchVars = allCPTRows.map((row) => {
         const stress = computeStressAtElevation(row.elevation, ground_level, gwt_elevation, units);
-        const unit = getUnitAtElevation(row.elevation, units);
+        const unit = getUnitAtElevation(row.elevation, units) ?? units[0];
         return {
           qc: row.qc,
           fs: row.fs,
@@ -48,7 +46,7 @@ export function useEquationRecalculation() {
 
       const result = await pyodideService.runBatch(corr.equation_code, batchVars);
       allCPTRows.forEach((row, i) => {
-        const unit = getUnitAtElevation(row.elevation, units);
+        const unit = getUnitAtElevation(row.elevation, units) ?? units[0];
         newRows.push({
           id: `${row.hole_id}_${row.elevation}_${corr.id}`,
           hole_id: row.hole_id,
@@ -57,7 +55,7 @@ export function useEquationRecalculation() {
           correlation_id: corr.id,
           correlation_name: corr.name,
           phi_calculated: result.results[i],
-          geo_unit: unit?.name ?? 'Unknown',
+          geo_unit: unit?.name ?? 'Undefined',
           error: result.errors[i] ?? undefined,
         });
       });
@@ -69,10 +67,10 @@ export function useEquationRecalculation() {
 
     for (const corr of sptCorrelations) {
       if (pyodideService.getPhase() !== 'ready') continue;
-      const batchVars: Record<string, number>[] = allSPTRows.map((row) => {
+      const batchVars = allSPTRows.map((row) => {
         const stress = computeStressAtElevation(row.elevation, ground_level, gwt_elevation, units);
         const { N60, N160 } = correctSPT(row, stress.sigma_v_eff);
-        const unit = getUnitAtElevation(row.elevation, units);
+        const unit = getUnitAtElevation(row.elevation, units) ?? units[0];
         return {
           N_measured: row.N_measured,
           N60,
@@ -89,7 +87,7 @@ export function useEquationRecalculation() {
 
       const result = await pyodideService.runBatch(corr.equation_code, batchVars);
       allSPTRows.forEach((row, i) => {
-        const unit = getUnitAtElevation(row.elevation, units);
+        const unit = getUnitAtElevation(row.elevation, units) ?? units[0];
         newRows.push({
           id: `${row.hole_id}_${row.elevation}_${corr.id}`,
           hole_id: row.hole_id,
@@ -98,26 +96,24 @@ export function useEquationRecalculation() {
           correlation_id: corr.id,
           correlation_name: corr.name,
           phi_calculated: result.results[i],
-          geo_unit: unit?.name ?? 'Unknown',
+          geo_unit: unit?.name ?? 'Undefined',
           error: result.errors[i] ?? undefined,
         });
       });
     }
 
     // --- Shear box regression (TypeScript) ---
+    // All specimens treated as a single group (single-unit simplification)
     const shearBoxCorr = correlations.find((c) => c.id === 'shear_box_regression' && c.active);
     if (shearBoxCorr) {
       const allSBRows = datasets.flatMap((d) => d.shear_box_rows);
-      for (const unit of units) {
-        const unitRows = allSBRows.filter((r) => r.geo_unit === unit.name);
-        if (unitRows.length < 2) continue;
+      if (allSBRows.length >= 2) {
         const phi = shearBoxPhi(
-          unitRows.map((r) => r.normal_stress),
-          unitRows.map((r) => r.shear_stress)
+          allSBRows.map((r) => r.normal_stress),
+          allSBRows.map((r) => r.shear_stress)
         );
-        // Add one representative row per unit at mid-elevation
-        const midElev = (unit.top_elevation + unit.base_elevation) / 2;
-        unitRows.forEach((row) => {
+        allSBRows.forEach((row) => {
+          const unit = getUnitAtElevation(row.elevation, units) ?? units[0];
           newRows.push({
             id: `${row.sample_id}_${row.elevation}_shear_box`,
             hole_id: row.hole_id,
@@ -126,33 +122,32 @@ export function useEquationRecalculation() {
             correlation_id: 'shear_box_regression',
             correlation_name: shearBoxCorr.name,
             phi_calculated: phi,
-            geo_unit: unit.name,
+            geo_unit: unit?.name ?? 'Undefined',
           });
         });
-        void midElev;
       }
     }
 
     // --- Triaxial regression (TypeScript) ---
+    // All specimens treated as a single group (single-unit simplification)
     const triaxCorr = correlations.find((c) => c.id === 'triaxial_regression' && c.active);
     if (triaxCorr) {
       const allTXRows = datasets.flatMap((d) => d.triaxial_rows);
-      for (const unit of units) {
-        const unitRows = allTXRows.filter((r) => r.geo_unit === unit.name);
-        if (unitRows.length < 2) continue;
-        const sigma3eff = unitRows.map((r) => r.cell_pressure - r.pore_pressure_at_failure);
-        const sigma1eff = unitRows.map((r) => r.cell_pressure + r.deviator_stress_at_failure - r.pore_pressure_at_failure);
+      if (allTXRows.length >= 2) {
+        const sigma3eff = allTXRows.map((r) => r.cell_pressure - r.pore_pressure_at_failure);
+        const sigma1eff = allTXRows.map((r) => r.cell_pressure + r.deviator_stress_at_failure - r.pore_pressure_at_failure);
         const phi = triaxialPhi(sigma3eff, sigma1eff);
-        unitRows.forEach((row) => {
+        allTXRows.forEach((row) => {
+          const unit = getUnitAtElevation(row.elevation, units) ?? units[0];
           newRows.push({
-            id: `${row.sample_id}_${row.elevation}_triaxial_${uuidv4().slice(0,8)}`,
+            id: `${row.sample_id}_${row.elevation}_triaxial`,
             hole_id: row.hole_id,
             elevation: row.elevation,
             source_type: 'Triaxial',
             correlation_id: 'triaxial_regression',
             correlation_name: triaxCorr.name,
             phi_calculated: phi,
-            geo_unit: unit.name,
+            geo_unit: unit?.name ?? 'Undefined',
           });
         });
       }
@@ -163,7 +158,6 @@ export function useEquationRecalculation() {
   }, []);
 
   useEffect(() => {
-    // Trigger recalculation when relevant store slices change
     const unsubscribe = useProjectStore.subscribe((state, prev) => {
       const changed =
         state.datasets !== prev.datasets ||
@@ -175,6 +169,9 @@ export function useEquationRecalculation() {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(runCalculations, DEBOUNCE_MS);
     });
+
+    // Run once on mount in case there is already cached data + Pyodide ready
+    timerRef.current = setTimeout(runCalculations, 100);
 
     return () => {
       unsubscribe();

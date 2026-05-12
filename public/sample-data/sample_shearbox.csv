@@ -1,0 +1,16 @@
+sample_id,hole_id,geo_unit,elevation,normal_stress,shear_stress
+SB-001,BH-01,Made Ground,48.58,50,26.9
+SB-001,BH-02,Made Ground,49.24,100,55.39
+SB-001,BH-03,Made Ground,48.77,200,103.2
+SB-001,BH-01,Made Ground,49.29,300,168.98
+SB-001,BH-02,Made Ground,49.34,400,210.21
+SB-002,BH-01,Dense Sand,41.7,50,36.52
+SB-002,BH-02,Dense Sand,41.21,100,71.33
+SB-002,BH-03,Dense Sand,41.25,200,144.62
+SB-002,BH-01,Dense Sand,41.02,300,210.62
+SB-002,BH-02,Dense Sand,41.7,400,302.94
+SB-003,BH-01,Stiff Clay,27.38,50,26.3
+SB-003,BH-02,Stiff Clay,27.91,100,51.1
+SB-003,BH-03,Stiff Clay,28.0,200,88.71
+SB-003,BH-01,Stiff Clay,27.85,300,139.4
+SB-003,BH-02,Stiff Clay,27.98,400,188.37

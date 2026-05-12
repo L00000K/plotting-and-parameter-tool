@@ -7,8 +7,12 @@ import { useProjectStore } from '@/store/useProjectStore';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Plot = createPlotlyComponent(Plotly as any);
 
-export function MainPlot() {
-  const { traces, layout } = usePlotData();
+interface Props {
+  hiddenLayers?: Set<string>;
+}
+
+export function MainPlot({ hiddenLayers }: Props) {
+  const { traces, layout } = usePlotData(hiddenLayers);
   const interpretedCount = useProjectStore((s) => s.interpreted_cache.length);
   const pyPhase = useProjectStore((s) => s.pyodide_status.phase);
 
@@ -23,7 +27,7 @@ export function MainPlot() {
 
   if (interpretedCount === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-500 text-sm">
+      <div className="flex items-center justify-center h-full text-gray-400 text-sm">
         {pyPhase !== 'ready'
           ? 'Start Python runtime and load data to see the plot.'
           : 'Load factual data to generate the soil cloud plot.'}

@@ -61,37 +61,37 @@ export function ImportPanel() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-xl">
       <div className="flex gap-2">
         <button
           onClick={loadSampleData}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium cursor-pointer"
         >
           Load Sample Dataset
         </button>
       </div>
 
-      <div className="border border-slate-700 rounded-lg p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-slate-300">Import File</h3>
+      <div className="border border-gray-200 rounded-lg p-4 space-y-3 bg-white">
+        <h3 className="text-sm font-semibold text-gray-700">Import File</h3>
         <div className="flex gap-4">
-          <label className="text-xs text-slate-400">
+          <label className="text-xs text-gray-600">
             Format:{' '}
             <select
               value={format}
               onChange={(e) => setFormat(e.target.value as FileFormat)}
-              className="ml-1 bg-slate-800 border border-slate-600 rounded px-2 py-0.5 text-slate-200"
+              className="ml-1 bg-white border border-gray-300 rounded px-2 py-0.5 text-gray-800"
             >
               <option value="csv">CSV</option>
               <option value="ags4">AGS4</option>
             </select>
           </label>
           {format === 'csv' && (
-            <label className="text-xs text-slate-400">
+            <label className="text-xs text-gray-600">
               Data type:{' '}
               <select
                 value={sourceType}
                 onChange={(e) => setSourceType(e.target.value as SourceType)}
-                className="ml-1 bg-slate-800 border border-slate-600 rounded px-2 py-0.5 text-slate-200"
+                className="ml-1 bg-white border border-gray-300 rounded px-2 py-0.5 text-gray-800"
               >
                 <option value="CPT">CPT</option>
                 <option value="SPT">SPT</option>
@@ -102,22 +102,22 @@ export function ImportPanel() {
           )}
         </div>
         <FileDropZone onFile={handleFile} accept={format === 'ags4' ? '.ags,.txt' : '.csv'} />
-        {message && <p className="text-xs text-green-400">{message}</p>}
+        {message && <p className="text-xs text-green-700">{message}</p>}
       </div>
 
       {datasets.length > 0 && (
-        <div className="border border-slate-700 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-slate-300 mb-2">Loaded Datasets</h3>
+        <div className="border border-gray-200 rounded-lg p-4 bg-white">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Loaded Datasets</h3>
           <div className="space-y-1">
             {datasets.map((ds) => (
-              <div key={ds.id} className="flex items-center justify-between text-xs text-slate-400">
+              <div key={ds.id} className="flex items-center justify-between text-xs text-gray-600">
                 <span className="truncate max-w-xs">{ds.source_file}</span>
-                <span className="text-slate-500 mx-2">
+                <span className="text-gray-400 mx-2">
                   {ds.cpt_rows.length + ds.spt_rows.length + ds.shear_box_rows.length + ds.triaxial_rows.length} records
                 </span>
                 <button
                   onClick={() => removeDataset(ds.id)}
-                  className="text-red-400 hover:text-red-300 cursor-pointer"
+                  className="text-red-500 hover:text-red-700 cursor-pointer"
                 >
                   ✕
                 </button>

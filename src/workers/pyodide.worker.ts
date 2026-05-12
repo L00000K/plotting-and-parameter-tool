@@ -1,9 +1,7 @@
 // Web Worker: loads Pyodide from CDN and executes geotechnical equation batches.
 // Runs in a separate thread to keep the UI responsive during Python execution.
 
-declare function importScripts(...urls: string[]): void;
-
-const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js';
+const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.mjs';
 
 type WorkerRequest =
   | { type: 'INIT' }
@@ -22,9 +20,10 @@ let pyodide: any = null;
 async function init() {
   try {
     self.postMessage({ type: 'INIT_PROGRESS', message: 'Loading Python runtime...' });
-    importScripts(PYODIDE_CDN);
+    // importScripts() is unavailable in ES module workers; use dynamic import with the .mjs build
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    pyodide = await (self as any).loadPyodide();
+    const { loadPyodide } = await import(/* @vite-ignore */ PYODIDE_CDN) as any;
+    pyodide = await loadPyodide();
     self.postMessage({ type: 'READY' } satisfies WorkerResponse);
   } catch (e) {
     self.postMessage({ type: 'INIT_ERROR', error: String(e) } satisfies WorkerResponse);

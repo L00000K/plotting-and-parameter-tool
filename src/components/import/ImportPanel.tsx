@@ -44,7 +44,7 @@ export function ImportPanel() {
   }
 
   async function loadSampleData() {
-    const base = (import.meta as unknown as { env: { BASE_URL: string } }).env.BASE_URL ?? '/';
+    const base = import.meta.env.BASE_URL ?? '/';
     const files: [string, SourceType][] = [
       ['sample_cpt.csv', 'CPT'],
       ['sample_spt.csv', 'SPT'],

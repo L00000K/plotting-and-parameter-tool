@@ -1,24 +1,22 @@
 import { useMemo } from 'react';
 import createPlotlyComponent from 'react-plotly.js/factory';
+import * as Plotly from 'plotly.js-dist-min';
 import { usePlotData } from './usePlotData';
 import { useProjectStore } from '@/store/useProjectStore';
 
-// plotly.js-dist-min ships a UMD bundle; cast to any to satisfy react-plotly factory
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
-const Plotly = require('plotly.js-dist-min') as any;
-const Plot = createPlotlyComponent(Plotly);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Plot = createPlotlyComponent(Plotly as any);
 
 export function MainPlot() {
   const { traces, layout } = usePlotData();
   const interpretedCount = useProjectStore((s) => s.interpreted_cache.length);
   const pyPhase = useProjectStore((s) => s.pyodide_status.phase);
 
-  const config = useMemo((): Partial<Plotly.Config> => ({
+  const config = useMemo(() => ({
     responsive: true,
     displayModeBar: true,
-    modeBarButtonsToRemove: ['select2d', 'lasso2d'] as Plotly.ModeBarDefaultButtons[],
     toImageButtonOptions: {
-      format: 'svg' as const,
+      format: 'svg',
       filename: 'phi_profile',
     },
   }), []);
@@ -36,9 +34,12 @@ export function MainPlot() {
   return (
     <div className="h-full w-full">
       <Plot
-        data={traces as Plotly.Data[]}
-        layout={layout as Partial<Plotly.Layout>}
-        config={config}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data={traces as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        layout={layout as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        config={config as any}
         style={{ width: '100%', height: '100%' }}
         useResizeHandler
       />
